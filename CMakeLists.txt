@@ -47,7 +47,14 @@ pico_enable_stdio_usb(ChipTempMonitor 1)
 # Add the standard library to the build
 target_link_libraries(ChipTempMonitor
         pico_stdlib
-        hardware_adc)
+        hardware_adc
+        hardware_i2c
+        )
+
+target_sources(ChipTempMonitor PRIVATE
+    ChipTempMonitor.c
+    ssd1306.c
+)
 
 # Add the standard include files to the build
 target_include_directories(ChipTempMonitor PRIVATE

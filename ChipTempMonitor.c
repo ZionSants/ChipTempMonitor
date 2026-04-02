@@ -1,8 +1,12 @@
 #include <stdio.h>
 #include "pico/stdlib.h"
 #include "hardware/adc.h"
-#include <string.h>
+#include "hardware/i2c.h"
+#include "ssd1306.h"
 
+#define I2C_PORT i2c1
+#define SDA 14
+#define SCL 15
 #define LEDV 13 // Pino do led vermelho
 #define BTNA 5 // Pino do botão A
 #define BTNB 6 // Pino do botão B
@@ -42,14 +46,29 @@ int main()
     stdio_init_all();
     configPinos();
 
+    i2c_init(I2C_PORT, 400 * 1000);
+    gpio_set_function(SDA, GPIO_FUNC_I2C);
+    gpio_set_function(SCL, GPIO_FUNC_I2C);
+    gpio_pull_up(SDA);
+    gpio_pull_up(SCL);
+
+    ssd1306_t display;
+    ssd1306_init(&display, 128, 64, 0x3C, I2C_PORT);
+
+
     while (true) {
         uint16_t valoradc = adc_read();
 
         float temperatura = conversao(valoradc); // Chama a função conversão para temperatura em Celsius
 
-        printf("Temperatura atual: %.2f °C\n", temperatura);
+        char texto[20];
+        sprintf(texto, "Temperatura: %.1f C", temperatura);
 
-        sleep_ms(500);
+        ssd1306_clear(&display);
+        ssd1306_draw_string(&display, 0, 20, 1, texto);
+        ssd1306_show(&display);
+
+        sleep_ms(1000);
     }
     return 0;
 }
