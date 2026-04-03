@@ -49,6 +49,7 @@ target_link_libraries(ChipTempMonitor
         pico_stdlib
         hardware_adc
         hardware_i2c
+        hardware_pwm
         )
 
 target_sources(ChipTempMonitor PRIVATE

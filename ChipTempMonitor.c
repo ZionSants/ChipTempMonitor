@@ -2,14 +2,21 @@
 #include "pico/stdlib.h"
 #include "hardware/adc.h"
 #include "hardware/i2c.h"
+#include "hardware/pwm.h"
 #include "ssd1306.h"
 
+#define BUZZER 21 // Pino do buzzer
 #define I2C_PORT i2c1
 #define SDA 14
 #define SCL 15
 #define BTNA 5 // Pino do botão A
 #define BTNB 6 // Pino do botão B
 #define adcTemperatura 4 // Canal do sensor de temperatura interna
+
+ssd1306_t display;
+
+void buzzerAlerta(uint freq, uint duration);
+void analiseTemperatura(float temperatura);
 
 // Função para configurar os pinos utilizados
 void configPinos() { 
@@ -33,6 +40,46 @@ void configPinos() {
     gpio_set_function(SCL, GPIO_FUNC_I2C);
     gpio_pull_up(SDA);
     gpio_pull_up(SCL);
+
+    // Inicialização do buzzer
+    gpio_set_function(BUZZER, GPIO_FUNC_PWM);
+    uint slice = pwm_gpio_to_slice_num(BUZZER);
+    pwm_set_enabled(slice, false);
+}
+
+void buzzerAlerta(uint freq, uint duration) {
+    gpio_set_function(BUZZER, GPIO_FUNC_PWM);
+    uint slice = pwm_gpio_to_slice_num(BUZZER);
+    uint channel = pwm_gpio_to_channel(BUZZER);
+
+    pwm_set_clkdiv(slice, 125.0f);
+    uint32_t wrap = (1000000 / freq) - 1;
+
+    pwm_set_wrap(slice, (uint16_t)wrap);
+    pwm_set_chan_level(slice, channel, wrap / 2); // 50% duty cycle
+    pwm_set_enabled(slice, true);
+    sleep_ms(duration);
+    pwm_set_enabled(slice, false);
+
+    gpio_set_function(BUZZER, GPIO_FUNC_SIO);
+    gpio_set_dir(BUZZER, GPIO_OUT);
+    gpio_put(BUZZER, 0);
+}
+
+void analiseTemperatura(float temperatura) {
+    char texto[25];
+    ssd1306_clear(&display);
+
+    if (temperatura < 35.0f) {
+        sprintf(texto, "Temperatura: %.1f C", temperatura);
+        ssd1306_draw_string(&display, 0, 20, 1, texto);
+    } else {
+        sprintf(texto, "Alerta! > 35C");
+        ssd1306_clear(&display);
+        ssd1306_draw_string(&display, 0, 20, 1, texto);
+        buzzerAlerta(523, 500);
+    }
+    ssd1306_show(&display);
 }
 
 // Função para converter o valor do adc para graus Celsius
@@ -47,28 +94,16 @@ int main()
 {
     stdio_init_all();
     configPinos();
-    ssd1306_t display;
+
     ssd1306_init(&display, 128, 64, 0x3C, I2C_PORT);
+    ssd1306_clear(&display);
+    ssd1306_show(&display);
 
     while (true) {
         uint16_t valoradc = adc_read();
-
         float temperatura = conversao(valoradc); // Chama a função conversão para temperatura em Celsius
-
-        if (temperatura < 35) {
-        char texto[20];
-        sprintf(texto, "Temperatura: %.1f C", temperatura);
-        ssd1306_clear(&display);
-        ssd1306_draw_string(&display, 0, 20, 1, texto);
-        ssd1306_show(&display);
-        } else {
-        char texto[20];
-        sprintf(texto, "Alerta! Temp > 35C");
-        ssd1306_clear(&display);
-        ssd1306_draw_string(&display, 0, 20, 1, texto);
-        ssd1306_show(&display);
-        }
-        sleep_ms(5000);
+        analiseTemperatura(temperatura);
+        sleep_ms(3000);
     }
     return 0;
 }
