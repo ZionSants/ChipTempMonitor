@@ -11,16 +11,27 @@
 #define I2C_PORT i2c1
 #define SDA 14
 #define SCL 15
+ssd1306_t display; // Declaração global do display
 
 #define BTNA 5 // Pino do botão A
 #define BTNB 6 // Pino do botão B
 #define adcTemperatura 4 // Canal do sensor de temperatura interna
 
-ssd1306_t display; // Declaração global do display
+volatile bool buzzerOn = true; // Controle do buzzer habilitado ou não
+float ultimaTemp = 0.0f; // Última temperatura lida
+volatile bool statusAlterado = false; 
 
 // Protótipos para função conseguir chamar a outra
 void buzzerAlerta(uint freq, uint duration);
 void analiseTemperatura(float temperatura);
+
+// Callback do botão A para habilitar e desabilitar o buzzer
+void botaoCallback(uint gpio, uint32_t events) {
+    if(gpio == BTNA) {
+        buzzerOn = !buzzerOn;
+        statusAlterado = true; // Aviso para atualizar o display no loop principal
+    }
+}
 
 // Função para configurar os pinos utilizados
 void configPinos() { 
@@ -49,6 +60,8 @@ void configPinos() {
     gpio_set_function(BUZZER, GPIO_FUNC_PWM);
     uint slice = pwm_gpio_to_slice_num(BUZZER);
     pwm_set_enabled(slice, false);
+
+    gpio_set_irq_enabled_with_callback(BTNA, GPIO_IRQ_EDGE_FALL, true, &botaoCallback);
 }
 
 // Função que emite um som no buzzer por um tempo
@@ -87,10 +100,15 @@ void analiseTemperatura(float temperatura) {
     } else {
         //Temperatura alta, emite mensagem diferente e som
         sprintf(texto, "Alerta! > 35C");
-        ssd1306_clear(&display);
         ssd1306_draw_string(&display, 0, 20, 1, texto);
-        buzzerAlerta(523, 500); // 523hz em 500ms
+
+        if (buzzerOn) {
+            buzzerAlerta(523, 500);
+        }
     }
+
+    ssd1306_draw_string(&display, 0, 50, 1,
+    buzzerOn ? "Alerta: ON " : "Alerta: OFF");
     ssd1306_show(&display); // Envia o framebuffer pro display
 }
 
@@ -114,9 +132,16 @@ int main()
 
     // Lê a temperatura e atualiza o display a cada 3 segundos
     while (true) {
+
+        // Atualiza o display caso o botão seja pressionado
+        if(statusAlterado) {
+            statusAlterado = false;
+            analiseTemperatura(ultimaTemp);
+        }
+
         uint16_t valoradc = adc_read();
-        float temperatura = conversao(valoradc); // Chama a função conversão para temperatura em Celsius
-        analiseTemperatura(temperatura);
+        ultimaTemp = conversao(valoradc); // Salva para usar no callback
+        analiseTemperatura(ultimaTemp);
         sleep_ms(3000);
     }
     return 0;
