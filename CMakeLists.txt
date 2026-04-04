@@ -50,6 +50,7 @@ target_link_libraries(ChipTempMonitor
         hardware_adc
         hardware_i2c
         hardware_pwm
+        hardware_timer
         )
 
 target_sources(ChipTempMonitor PRIVATE
