@@ -5,8 +5,8 @@
 #include "display.h"
 #include "sensores.h"
 
-#define BTNA 5 // Pino do botão A
-#define BTNB 6 // Pino do botão B
+#define BTNA 5 // Pino botão A
+#define BTNB 6 // Pino botão B
 
 volatile bool buzzerOn = true; // Controle do buzzer habilitado ou não
 volatile bool statusAlterado = false; // Sinalização de pressão no botão
