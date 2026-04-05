@@ -56,17 +56,15 @@ target_link_libraries(ChipTempMonitor
 target_sources(ChipTempMonitor PRIVATE
     ChipTempMonitor.c
     ssd1306.c
+    buzzer.c
+    display.c
+    sensores.c
 )
 
 # Add the standard include files to the build
 target_include_directories(ChipTempMonitor PRIVATE
         ${CMAKE_CURRENT_LIST_DIR}
 )
-
-# Add any user requested libraries
-target_link_libraries(ChipTempMonitor 
-        
-        )
 
 pico_add_extra_outputs(ChipTempMonitor)
 
