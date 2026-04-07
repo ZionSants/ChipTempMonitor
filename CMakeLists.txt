@@ -41,7 +41,7 @@ pico_set_program_name(ChipTempMonitor "ChipTempMonitor")
 pico_set_program_version(ChipTempMonitor "0.1")
 
 # Modify the below lines to enable/disable output over UART/USB
-pico_enable_stdio_uart(ChipTempMonitor 0)
+pico_enable_stdio_uart(ChipTempMonitor 1)
 pico_enable_stdio_usb(ChipTempMonitor 1)
 
 # Add the standard library to the build
@@ -51,6 +51,7 @@ target_link_libraries(ChipTempMonitor
         hardware_i2c
         hardware_pwm
         hardware_timer
+        hardware_uart
         )
 
 target_sources(ChipTempMonitor PRIVATE
@@ -59,6 +60,7 @@ target_sources(ChipTempMonitor PRIVATE
     buzzer.c
     display.c
     sensores.c
+    uartLog.c
 )
 
 # Add the standard include files to the build

@@ -4,6 +4,7 @@
 #include "buzzer.h"
 #include "display.h"
 #include "sensores.h"
+#include "uartLog.h"
 
 #define BTNA 5 // Pino botão A
 #define BTNB 6 // Pino botão B
@@ -18,8 +19,18 @@ repeating_timer_t timer;
 
 // Callback do botão A para habilitar e desabilitar o buzzer
 void botaoCallback(uint gpio, uint32_t events) {
+    
+    // Variáveis para debounce no botão A
+    static uint32_t ultPressao = 0;
+    uint32_t now = to_ms_since_boot(get_absolute_time());
+
+    // Ignora o botão caso tenha sido pressionado há 200ms
+    if(now - ultPressao < 200) return;
+    ultPressao = now;
+
     if(gpio == BTNA) {
         buzzerOn = !buzzerOn;
+        uartLog(buzzerOn ? "Alerta sonoro On" : "Alerta sonoro off");
     }
     statusAlterado = true; // Aviso para atualizar o display no loop principal
 }
@@ -32,7 +43,14 @@ bool timerCallback(repeating_timer_t *rt) {
 
 int main()
 {
+    // Inicialização dos módulos
     stdio_init_all();
+    uartLogInit();
+    sensoresInit();
+    buzzerInit();
+    displayInit();
+
+    #include "uartLog.h"
 
     // Inicialização dos botões
     gpio_init(BTNA);
@@ -44,11 +62,6 @@ int main()
     gpio_pull_up(BTNB);
  
     gpio_set_irq_enabled_with_callback(BTNA, GPIO_IRQ_EDGE_FALL, true, &botaoCallback);
-
-    // Inicialização dos módulos
-    sensoresInit();
-    buzzerInit();
-    displayInit();
 
     // -1000 Utiliza intervalo fixo de leitura independente do callback
     add_repeating_timer_ms(-1000, timerCallback, NULL, &timer); 
@@ -79,6 +92,9 @@ int main()
         adc_select_input(4);
         uint16_t valoradc = adc_read();
         ultimaTemp = conversao(valoradc); // Salva para usar no callback
+
+        // Log a cada leitura
+        uartLogTemp(ultimaTemp, limiteTemp, ultimaTemp >= limiteTemp);
 
             if(ultimaTemp >= limiteTemp && buzzerOn) {
                 buzzerAlerta(523, 500);

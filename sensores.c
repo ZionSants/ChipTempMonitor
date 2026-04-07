@@ -1,4 +1,6 @@
 #include "sensores.h"
+#include "uartLog.h"
+#include <stdio.h>
 
 float limiteTemp = 35.0f; // Limite padrão ajustável de temperatura
 volatile bool limiteAlterado = false; // Controle do limite de temperatura em tempo real
@@ -27,6 +29,11 @@ void ajustaLimite(uint16_t valorY) {
             limiteTemp = limiteMax;
         }
         limiteAlterado = true;
+    }
+    if(limiteAlterado) {
+        char buffer[40];
+        snprintf(buffer, sizeof(buffer), "[JOY] Limite ajustado: %.1f C", limiteTemp);
+        uartLog(buffer);
     }
 }
 
