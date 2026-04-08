@@ -17,6 +17,8 @@ float ultimaTemp = 0.0f; // Última temperatura lida
 
 repeating_timer_t timer;
 
+volatile tela telaAtual = telaTemperatura;
+
 // Callback do botão A para habilitar e desabilitar o buzzer
 void botaoCallback(uint gpio, uint32_t events) {
     
@@ -31,6 +33,9 @@ void botaoCallback(uint gpio, uint32_t events) {
     if(gpio == BTNA) {
         buzzerOn = !buzzerOn;
         uartLog(buzzerOn ? "Alerta sonoro On" : "Alerta sonoro off");
+    }else if(gpio == BTNB) {
+        telaAtual = (telaAtual == telaTemperatura) ? telaGrafico : telaTemperatura;
+        uartLog(telaAtual == telaGrafico ? "Tela: Grafico" : "Tela: Temperatura");
     }
     statusAlterado = true; // Aviso para atualizar o display no loop principal
 }
@@ -50,8 +55,6 @@ int main()
     buzzerInit();
     displayInit();
 
-    #include "uartLog.h"
-
     // Inicialização dos botões
     gpio_init(BTNA);
     gpio_set_dir(BTNA, GPIO_IN);
@@ -61,7 +64,9 @@ int main()
     gpio_set_dir(BTNB, GPIO_IN);
     gpio_pull_up(BTNB);
  
+    // Callback do botão A e B
     gpio_set_irq_enabled_with_callback(BTNA, GPIO_IRQ_EDGE_FALL, true, &botaoCallback);
+    gpio_set_irq_enabled(BTNB, GPIO_IRQ_EDGE_FALL, true);
 
     // -1000 Utiliza intervalo fixo de leitura independente do callback
     add_repeating_timer_ms(-1000, timerCallback, NULL, &timer); 
@@ -77,33 +82,34 @@ int main()
         // Atualiza o display caso o botão seja pressionado
         if(statusAlterado) {
             statusAlterado = false;
-            analiseTemperatura(ultimaTemp);
+            atualizarDisplay(ultimaTemp);
         }
 
         // Atualiza o display caso o joystick saia da zona morta
         if(limiteAlterado) {
             limiteAlterado = false;
-            analiseTemperatura(ultimaTemp);
+            atualizarDisplay(ultimaTemp);
         }
 
         // Quando o timer dispara, lê a temperatura e aciona o buzzer caso esteja no limite
         if(lerTemperatura) {
-        lerTemperatura = false;
-        adc_select_input(4);
-        uint16_t valoradc = adc_read();
-        ultimaTemp = conversao(valoradc); // Salva para usar no callback
+            lerTemperatura = false;
+            adc_select_input(4);
+            uint16_t valoradc = adc_read();
+            ultimaTemp = conversao(valoradc); // Salva para usar no callback
 
-        // Log a cada leitura
-        uartLogTemp(ultimaTemp, limiteTemp, ultimaTemp >= limiteTemp);
+            // Log a cada leitura
+            uartLogTemp(ultimaTemp, limiteTemp, ultimaTemp >= limiteTemp);
 
+            graficoAdd(ultimaTemp);
+
+            // Envia o tempo e a frequência que o buzzer irá tocar
             if(ultimaTemp >= limiteTemp && buzzerOn) {
                 buzzerAlerta(523, 500);
             }
-        analiseTemperatura(ultimaTemp);
+            atualizarDisplay(ultimaTemp);
         }
         sleep_ms(100);
     }
     return 0;
-
-    // oi
 }
