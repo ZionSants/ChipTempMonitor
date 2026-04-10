@@ -24,9 +24,9 @@ Monitor de temperatura de um sistema, portátil, desenvolvido para a placa **Bit
 | Componente | Detalhe |
 |---|---|
 | Placa | BitDogLab - RP2040 (Raspberry Pi Pico W) |
-| Display | SSD1306 OLED 128x64 - I2C (SDA: GPIO 14, SCL: GPIO 15) |
+| Display | SSD1306 OLED - I2C (SDA: GPIO 14, SCL: GPIO 15) |
 | Buzzer | Passivo - GPIO 21 (PWM) |
-| Joystick | Eixo Y analógico - GPIO 26 (ADC canal 0) |
+| Joystick | Eixo Y - GPIO 26 (ADC canal 0) |
 | Botão A | GPIO 5 - habilita/desabilita alerta sonoro |
 | Botão B | GPIO 6 - alterna entre tela de temperatura e gráfico |
 | Sensor | Sensor de temperatura interno do RP2040 (ADC canal 4) |
@@ -40,7 +40,7 @@ ChipTempMonitor/
 ├── ChipTempMonitor.c   # Arquivo principal do projeto
 ├── buzzer.c/.h         # Controle do buzzer via PWM
 ├── display.c/.h        # Display OLED
-├── sensores.c/.h       # ADC — leitura de temperatura e controle do joystick
+├── sensores.c/.h       # Leitura de temperatura e controle do joystick
 ├── uartLog.c/.h        # Log serial via USB
 ├── ssd1306.c/.h        # Biblioteca do display SSD1306
 └── CMakeLists.txt      # Configuração de build (Pico SDK 2.2.0)
