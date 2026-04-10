@@ -1,7 +1,7 @@
 READ.ME
 # 🌡️ ChipTempMonitor
 
-Monitor de temperatura interna desenvolvido para a placa **BitDogLab (RP2040)**, com display OLED, alerta sonoro, ajuste interativo de limite via joystick e gráfico histórico de leituras.
+Monitor de temperatura de um sistema, portátil, desenvolvido para a placa **BitDogLab (RP2040)**, com display OLED, alerta sonoro, ajuste interativo de limite via joystick e gráfico de leituras.
 
 ---
 
@@ -10,11 +10,11 @@ Monitor de temperatura interna desenvolvido para a placa **BitDogLab (RP2040)**,
 - **Leitura contínua** do sensor de temperatura interno do RP2040 (a cada 1 segundo)
 - **Display OLED SSD1306** com duas telas alternáveis:
   - Tela principal: temperatura atual, limite configurado e estado do alerta
-  - Tela de gráfico: histórico das últimas 10 leituras em barras
-- **Alerta sonoro** via buzzer passivo quando a temperatura ultrapassa o limite
+  - Tela de gráfico: histórico das últimas 10 leituras em colunas
+- **Alerta sonoro** via buzzer quando a temperatura ultrapassa o limite
 - **Limite ajustável** em tempo real pelo joystick (de 15°C a 70°C)
 - **Controle do alerta** pelo botão A (liga/desliga o buzzer)
-- **Alternância de tela** pelo botão B (temperatura ↔ gráfico)
+- **Alternância de tela** pelo botão B (temperatura <-> gráfico)
 - **Log serial** via USB — monitorável pelo PuTTY ou qualquer terminal serial
 
 ---
@@ -23,12 +23,12 @@ Monitor de temperatura interna desenvolvido para a placa **BitDogLab (RP2040)**,
 
 | Componente | Detalhe |
 |---|---|
-| Placa | BitDogLab — RP2040 (Raspberry Pi Pico W) |
-| Display | SSD1306 OLED 128x64 — I2C (SDA: GPIO 14, SCL: GPIO 15) |
-| Buzzer | Passivo — GPIO 21 (PWM) |
-| Joystick | Eixo Y analógico — GPIO 26 (ADC canal 0) |
-| Botão A | GPIO 5 — habilita/desabilita alerta sonoro |
-| Botão B | GPIO 6 — alterna entre tela de temperatura e gráfico |
+| Placa | BitDogLab - RP2040 (Raspberry Pi Pico W) |
+| Display | SSD1306 OLED 128x64 - I2C (SDA: GPIO 14, SCL: GPIO 15) |
+| Buzzer | Passivo - GPIO 21 (PWM) |
+| Joystick | Eixo Y analógico - GPIO 26 (ADC canal 0) |
+| Botão A | GPIO 5 - habilita/desabilita alerta sonoro |
+| Botão B | GPIO 6 - alterna entre tela de temperatura e gráfico |
 | Sensor | Sensor de temperatura interno do RP2040 (ADC canal 4) |
 
 ---
@@ -93,34 +93,18 @@ Temp: 35.1 C | Limite: 34.5 C | Alerta: Sim
 O firmware é organizado em torno de três eventos independentes, todos tratados no loop principal sem bloqueio:
 
 ```
-Timer 1s         → lê temperatura, adiciona ao gráfico, aciona buzzer se necessário
-Botão A/B (IRQ)  → alterna buzzer ou tela, redesenha display imediatamente  
-Joystick (poll)  → ajusta limite, redesenha display em tempo real
+Timer 1s    - lê temperatura, adiciona ao gráfico, aciona buzzer se necessário
+Botão A/B   - alterna buzzer ou tela, redesenha display imediatamente  
+Joystick    - ajusta limite, redesenha display em tempo real
 ```
 
-O buzzer é **não bloqueante** — usa um `repeating_timer` interno que desliga o PWM após a duração definida, mantendo o loop livre durante o alerta.
-
----
-
-## 📐 Tela de gráfico
-
-```
-Grafico          Alerta:ON
-─────────────────────────────
- █               █
- █    █    █     █   █
- █    █    █  █  █   █  █
-────────────────────────────
-33   34   35  34  35  34  33
-```
-
-Exibe as últimas 10 leituras em barras proporcionais à escala de 15°C–70°C. Os valores inteiros aparecem abaixo de cada barra.
+O buzzer é **não bloqueante** — usa um `repeating_timer` que desliga o PWM após a duração definida, mantendo o loop livre durante o alerta.
 
 ---
 
 ## 📦 Dependências
 
-- [pico-ssd1306](https://github.com/daschr/pico-ssd1306) — biblioteca do display OLED (incluída no projeto)
+- [pico-ssd1306](https://github.com/daschr/pico-ssd1306) — biblioteca utiliada no display OLED 
 - Pico SDK — `hardware_adc`, `hardware_i2c`, `hardware_pwm`, `hardware_timer`
 
 ---
@@ -128,4 +112,4 @@ Exibe as últimas 10 leituras em barras proporcionais à escala de 15°C–70°C
 ## 👤 Autor
 
 **ZionSants**  
-Projeto desenvolvido como parte de estudos em sistemas embarcados com o RP2040.
+Projeto desenvolvido para conclusão do curso EmbarcaTech com sistemas embarcados com a placa BitDogLab RP2040.
