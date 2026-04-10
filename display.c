@@ -29,7 +29,7 @@ void graficoAdd(float temperatura) {
 }
 
 // Renderiza o gráfico no framebuffer do display
-void graficoDraw(float limiteTemp) {
+void graficoDraw() {
     // Título, status do buzzer e linha abaixo
     ssd1306_draw_string(&display, 0, 0, 1, "Grafico");
     ssd1306_draw_string(&display, 70, 0, 1, buzzerOn ? "Alerta:ON " : "Alerta:OFF");
@@ -96,7 +96,6 @@ void atualizarDisplay(float temperatura) {
 // Análise da temperatura do sensor interno da placa
 void analiseTemperatura(float temperatura) {
     char texto1[25];
-    char texto2[25];
     char limTexto[25];
 
     ssd1306_clear(&display); // Limpa o framebuffer para escrever nova informação
@@ -106,13 +105,14 @@ void analiseTemperatura(float temperatura) {
         sprintf(texto1, "Temperatura: %.1f C", temperatura);
         ssd1306_draw_string(&display, 0, 10, 1, texto1);
     } else {
+        char texto2[25];
         //Temperatura alta, emite mensagem de alerta em duas linhas
         sprintf(texto1, "Alerta! %.1f C", temperatura);
         ssd1306_draw_string(&display, 17, 10, 1, texto1);
         sprintf(texto2, "Temperatura excedida");
         ssd1306_draw_string(&display, 3, 20, 1, texto2);
     }
-    sprintf(limTexto, "Limite C: %.1f C", limiteTemp);
+    sprintf(limTexto, "Limite: %.1f C", limiteTemp);
     ssd1306_draw_string(&display, 0, 35, 1, limTexto);
     ssd1306_draw_string(&display, 0, 50, 1, buzzerOn ? "Alerta: ON " : "Alerta: OFF");
 
