@@ -37,12 +37,12 @@ Monitor de temperatura interna desenvolvido para a placa **BitDogLab (RP2040)**,
 
 ```
 ChipTempMonitor/
-├── ChipTempMonitor.c   # Ponto de entrada — loop principal, callbacks, timer
-├── buzzer.c / .h       # Controle do buzzer via PWM (não bloqueante)
-├── display.c / .h      # Display OLED — tela de temperatura e gráfico
-├── sensores.c / .h     # ADC — leitura de temperatura e controle do joystick
-├── uartLog.c / .h      # Log serial via USB
-├── ssd1306.c / .h      # Biblioteca do display SSD1306
+├── ChipTempMonitor.c   # Arquivo principal do projeto
+├── buzzer.c/.h         # Controle do buzzer via PWM
+├── display.c/.h        # Display OLED
+├── sensores.c/.h       # ADC — leitura de temperatura e controle do joystick
+├── uartLog.c/.h        # Log serial via USB
+├── ssd1306.c/.h        # Biblioteca do display SSD1306
 └── CMakeLists.txt      # Configuração de build (Pico SDK 2.2.0)
 ```
 
@@ -52,21 +52,14 @@ ChipTempMonitor/
 
 ### Pré-requisitos
 
-- [Pico SDK 2.2.0](https://github.com/raspberrypi/pico-sdk)
-- [VS Code](https://code.visualstudio.com/) com a extensão **Raspberry Pi Pico**
+- Pico SDK 2.2.0
+- VS Code com a extensão **Raspberry Pi Pico**
 - CMake 3.13+
 - ARM GCC Toolchain
 
-### Build
+Na extensão **Raspberry Pi Pico** utilize o botão Import Project para adicionar o projeto ao seu vscode
 
-```bash
-mkdir build
-cd build
-cmake ..
-make
-```
-
-O arquivo `ChipTempMonitor.uf2` será gerado na pasta `build`. Copie para a placa com o botão BOOTSEL pressionado.
+Após compilar, copie o projeto para a placa com o botão BOOTSEL pressionado.
 
 ---
 
@@ -88,8 +81,8 @@ Temp: 35.1 C | Limite: 34.5 C | Alerta: Sim
 
 | Controle | Ação |
 |---|---|
-| Joystick ↑ | Aumenta o limite de temperatura |
-| Joystick ↓ | Diminui o limite de temperatura |
+| Joystick para cima | Aumenta o limite de temperatura |
+| Joystick para baixo | Diminui o limite de temperatura |
 | Botão A | Liga ou desliga o alerta sonoro |
 | Botão B | Alterna entre tela de temperatura e gráfico |
 
