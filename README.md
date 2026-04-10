@@ -3,6 +3,8 @@ READ.ME
 
 Monitor de temperatura de um sistema, portátil, desenvolvido para a placa **BitDogLab (RP2040)**, com display OLED, alerta sonoro, ajuste interativo de limite via joystick e gráfico de leituras.
 
+Vídeo de demonstraçã: https://www.youtube.com/watch?v=vD3ln_zaY3c
+
 ---
 
 ## 📋 Funcionalidades
